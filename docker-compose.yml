@@ -1,17 +1,35 @@
 version: '3.8'
+
 services:
   postgres:
     image: postgres:latest
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-data:/var/lib/postgresql
     environment:
       POSTGRES_DB: mydatabase
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     networks:
       - mynetwork
+    ports:
+      - "5432:5432"
+
+  api:
+    build: 
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: fastapi-app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/mydatabase
+    networks:
+      - mynetwork
+
 networks:
   mynetwork:
 
-volumes: 
+volumes:
   postgres_data:
